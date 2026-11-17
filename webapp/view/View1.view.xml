@@ -1,0 +1,507 @@
+<mvc:View
+    controllerName="zew.newscan.zewnewscan.controller.View1"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:ndc="sap.ndc">
+
+    <Page
+        id="page"
+        title="{i18n>title}"
+        class="zebraPage">
+
+        <content>
+
+            <VBox
+                width="100%"
+                class="zebraContent">
+
+                <!-- ================= ESCANEO PRINCIPAL ================= -->
+
+                <Input
+                    id="inpScan"
+                    placeholder="Escanea código"
+                    width="100%"
+                    class="zebraScanInput"
+                    submit="onBuscar" />
+
+                <!-- ================= BOTONES PRINCIPALES ================= -->
+
+                <FlexBox
+                    width="100%"
+                    wrap="Wrap"
+                    justifyContent="SpaceBetween"
+                    alignItems="Start"
+                    class="zebraToolbar">
+
+                    <!-- GRUPO ESCANEAR / BUSCAR -->
+
+                    <FlexBox
+                        wrap="Wrap"
+                        alignItems="Stretch"
+                        class="zebraActionGroup">
+
+            
+                        <Button
+                            text="Buscar"
+                            type="Emphasized"
+                            icon="sap-icon://search"
+                            press="onBuscar"
+                            class="zebraActionButton" />
+
+                    </FlexBox>
+
+                    <!-- GRUPO DE ACCIONES -->
+
+                    <FlexBox
+                        wrap="Wrap"
+                        alignItems="Stretch"
+                        class="zebraActionGroup">
+
+                        <Button
+                            text="Tarimas"
+                            type="Default"
+                            icon="sap-icon://shipping-status"
+                            press="onTarimas"
+                            class="zebraActionButton" />
+
+                        <Button
+                            text="Procesar"
+                            type="Accept"
+                            icon="sap-icon://process"
+                            press="onProcesar"
+                            class="zebraActionButton" />
+
+                        <Button
+                            text="Eliminar"
+                            type="Reject"
+                            icon="sap-icon://delete"
+                            press="onEliminar"
+                            class="zebraActionButton" />
+
+                        <Button
+                            text="Reimpresión"
+                            type="Attention"
+                            icon="sap-icon://print"
+                            press="onOpenReimpresionDialog"
+                            class="zebraActionButton" />
+
+                    </FlexBox>
+
+                </FlexBox>
+
+                <!-- ================= TABLA PRINCIPAL ================= -->
+
+                <Table
+                    id="table"
+                    width="100%"
+                    items="{tableModel>/ZE_TABLESet}"
+                    mode="MultiSelect"
+                    noDataText="No hay registros"
+                    class="zebraMainTable">
+
+                    <columns>
+
+                        <!-- Siempre visible -->
+                        <Column>
+                            <Text text="Material" />
+                        </Column>
+
+                        <!-- Se convierte en pop-in en pantalla pequeña -->
+                        <Column
+                            minScreenWidth="Tablet"
+                            demandPopin="true">
+                            <Text text="Lote" />
+                        </Column>
+
+                   
+
+                        <!-- Siempre visible -->
+                        <Column
+                            hAlign="End">
+                            <Text text="Cantidad" />
+                        </Column>
+
+                      
+
+                        <Column
+                            minScreenWidth="Tablet"
+                            demandPopin="true">
+                            <Text text="Almacén" />
+                        </Column>
+
+
+                    </columns>
+
+                    <items>
+
+                        <ColumnListItem>
+
+                            <cells>
+
+                                <Text
+                                    text="{tableModel>MATNR}"
+                                    wrapping="false" />
+
+                                <Text
+                                    text="{tableModel>CHARG}"
+                                    wrapping="false" />
+
+                            
+
+                                <ObjectNumber
+                                    number="{tableModel>MENGE}" />
+
+                            
+                                <Text
+                                    text="{tableModel>LGORT}"
+                                    wrapping="false" />
+
+                            
+                            </cells>
+
+                        </ColumnListItem>
+
+                    </items>
+
+                </Table>
+
+            </VBox>
+
+        </content>
+
+        <dependents>
+
+            <!-- ================= DIÁLOGO REIMPRESIÓN ================= -->
+
+            <Dialog
+                id="dialogReimpresion"
+                title="Reimpresión"
+                contentWidth="24rem"
+                stretchOnPhone="true">
+
+                <VBox
+                    width="100%"
+                    class="zebraDialogContent">
+
+                    <Input
+                        id="inpHU"
+                        placeholder="Ingresa HU"
+                        width="100%" />
+
+                    <Label
+                        text="Impresora"
+                        class="sapUiSmallMarginTop" />
+
+                    <ComboBox
+                        id="cmbImpresoraReimpresion"
+                        width="100%"
+                        placeholder="Selecciona impresora"
+                        busy="{impresorasModel>/busy}"
+                        selectedKey="{impresorasModel>/selectedPadestReimpresion}"
+                        items="{impresorasModel>/items}">
+
+                        <core:Item
+                            key="{impresorasModel>_PADEST_KEY}"
+                            text="{impresorasModel>_DISPLAY}" />
+
+                    </ComboBox>
+
+                </VBox>
+
+                <beginButton>
+                    <Button
+                        text="Imprimir"
+                        type="Emphasized"
+                        icon="sap-icon://print"
+                        press="onImprimirHU" />
+                </beginButton>
+
+                <endButton>
+                    <Button
+                        text="Cancelar"
+                        press="onCloseReimpresionDialog" />
+                </endButton>
+
+            </Dialog>
+
+            <!-- ================= DIÁLOGO ESCANEO TARIMA ================= -->
+
+            <Dialog
+                id="dialogTarimaScan"
+                title="Escanear tarima"
+                contentWidth="22rem"
+                stretchOnPhone="true">
+
+                <VBox
+                    width="100%"
+                    class="zebraDialogContent">
+
+                    <Text
+                        text="Escanea la tarima o captura el código manualmente."
+                        wrapping="true" />
+
+                    <Input
+                        id="inpTarimaScan"
+                        placeholder="Escanea tarima"
+                        width="100%"
+                        submit="onEnviarTarimaEscaneada"
+                        class="sapUiSmallMarginTop zebraScanInput" />
+
+                    <Button
+                        text="Escanear"
+                        icon="sap-icon://bar-code"
+                        press="onScanTarimaDialog"
+                        width="100%"
+                        class="sapUiSmallMarginTop zebraDialogButton" />
+
+                </VBox>
+
+                <beginButton>
+                    <Button
+                        text="Enviar"
+                        type="Emphasized"
+                        press="onEnviarTarimaEscaneada" />
+                </beginButton>
+
+                <endButton>
+                    <Button
+                        text="Cancelar"
+                        press="onCancelarTarimaScan" />
+                </endButton>
+
+            </Dialog>
+
+            <!-- ================= DIÁLOGO LISTADO TARIMAS ================= -->
+
+            <Dialog
+                id="dialogTarimasList"
+                title="Seleccione una tarima"
+                contentWidth="40rem"
+                stretchOnPhone="true">
+
+                <Table
+                    id="tableTarimas"
+                    width="100%"
+                    items="{tarimasModel>/items}"
+                    mode="SingleSelectMaster"
+                    includeItemInSelection="true"
+                    selectionChange="onTarimaListSelectionChange"
+                    growing="true"
+                    growingThreshold="100"
+                    growingScrollToLoad="true"
+                    noDataText="No hay tarimas">
+
+                    <columns>
+
+                        <Column>
+                            <Text text="Material" />
+                        </Column>
+
+                        <Column
+                            minScreenWidth="400px"
+                            demandPopin="true">
+                            <Text text="Descripción" />
+                        </Column>
+
+                    </columns>
+
+                    <items>
+
+                        <ColumnListItem type="Active">
+
+                            <cells>
+
+                                <ObjectIdentifier
+                                    title="{tarimasModel>MATNR}" />
+
+                                <Text
+                                    text="{tarimasModel>MAKTX}"
+                                    wrapping="true"
+                                    maxLines="2" />
+
+                            </cells>
+
+                        </ColumnListItem>
+
+                    </items>
+
+                </Table>
+
+                <endButton>
+                    <Button
+                        text="Cancelar"
+                        press="onCancelarTarimaList" />
+                </endButton>
+
+            </Dialog>
+
+            <!-- ================= DIÁLOGO IMPRESORAS PROCESAR ================= -->
+
+            <Dialog
+                id="dialogImpresorasProcesar"
+                title="Seleccionar impresora"
+                contentWidth="40rem"
+                stretchOnPhone="true">
+
+                <Table
+                    id="tableImpresorasProcesar"
+                    width="100%"
+                    mode="SingleSelectLeft"
+                    includeItemInSelection="true"
+                    items="{impresorasModel>/items}"
+                    busy="{impresorasModel>/busy}"
+                    noDataText="No hay impresoras disponibles">
+
+                    <columns>
+
+                        <Column>
+                            <Text text="Impresora" />
+                        </Column>
+
+                        <Column
+                            minScreenWidth="400px"
+                            demandPopin="true">
+                            <Text text="Ubicación" />
+                        </Column>
+
+                    </columns>
+
+                    <items>
+
+                        <ColumnListItem type="Active">
+
+                            <cells>
+
+                                <ObjectIdentifier
+                                    title="{impresorasModel>NAME}" />
+
+                                <Text
+                                    text="{impresorasModel>PASTANDORT}"
+                                    wrapping="true" />
+
+                            </cells>
+
+                        </ColumnListItem>
+
+                    </items>
+
+                </Table>
+
+                <beginButton>
+                    <Button
+                        text="Continuar"
+                        type="Emphasized"
+                        press="onContinuarImpresoraProcesar" />
+                </beginButton>
+
+                <endButton>
+                    <Button
+                        text="Cerrar"
+                        press="onCerrarImpresoraProcesar" />
+                </endButton>
+
+            </Dialog>
+
+            <!-- ================= DIÁLOGO AUTORIZACIÓN ================= -->
+
+            <Dialog
+                id="dialogAutorizacion"
+                title="Autorización requerida"
+                contentWidth="24rem"
+                stretchOnPhone="true">
+
+                <VBox
+                    width="100%"
+                    class="zebraDialogContent">
+
+                    <Text
+                        id="txtAuthMessage"
+                        wrapping="true" />
+
+                    <Label
+                        text="Contraseña"
+                        class="sapUiSmallMarginTop" />
+
+                    <Input
+                        id="inpAuthCode"
+                        type="Password"
+                        placeholder="Ingresa contraseña"
+                        width="100%"
+                        submit="onAutorizarSobrepeso" />
+
+                </VBox>
+
+                <beginButton>
+                    <Button
+                        text="Autorizar"
+                        type="Emphasized"
+                        press="onAutorizarSobrepeso" />
+                </beginButton>
+
+                <endButton>
+                    <Button
+                        text="Cancelar"
+                        press="onCloseAutorizacionDialog" />
+                </endButton>
+
+            </Dialog>
+
+            <!-- ================= DIÁLOGO AUTORIZACIÓN MUBEA ================= -->
+
+            <Dialog
+                id="dialogMubea"
+                title="Autorización MUBEA"
+                contentWidth="24rem"
+                stretchOnPhone="true">
+
+                <VBox
+                    width="100%"
+                    class="zebraDialogContent">
+
+                    <Text
+                        id="txtMubeaMessage"
+                        wrapping="true" />
+
+                    <Label
+                        text="Usuario"
+                        class="sapUiSmallMarginTop" />
+
+                    <Input
+                        id="inpMubeaUser"
+                        placeholder="Ingresa usuario"
+                        width="100%" />
+
+                    <Label
+                        text="Contraseña"
+                        class="sapUiSmallMarginTop" />
+
+                    <Input
+                        id="inpMubeaPass"
+                        type="Password"
+                        placeholder="Ingresa contraseña"
+                        width="100%"
+                        submit="onValidarMubea" />
+
+                </VBox>
+
+                <beginButton>
+                    <Button
+                        text="Autorizar"
+                        type="Emphasized"
+                        press="onValidarMubea" />
+                </beginButton>
+
+                <endButton>
+                    <Button
+                        text="Cancelar"
+                        press="onCancelarMubea" />
+                </endButton>
+
+            </Dialog>
+
+        </dependents>
+
+    </Page>
+
+</mvc:View>

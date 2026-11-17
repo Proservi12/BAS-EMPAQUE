@@ -1,0 +1,28 @@
+# yaml-language-server: $schema=https://sap.github.io/ui5-tooling/schema/ui5.yaml.json
+
+specVersion: "4.0"
+metadata:
+  name: zew.newscan.zewnewscan
+
+type: application
+builder:
+  resources:
+    excludes:
+      - /test/**
+      - /localService/**
+  customTasks:
+    - name: deploy-to-abap
+      afterTask: generateCachebusterInfo
+      configuration:
+        target:
+          destination: S4H_DEV_ANDONIX
+          url: http://swdev:443
+          client: '100'
+        app:
+          name: ZEW_NEWSCAN
+          description: New Scan
+          package: Z001
+          transport: DS4K908873
+        exclude:
+          - /test/
+          - /localService/
